@@ -4,6 +4,7 @@ import { Shield, Eye, Camera, ArrowLeft, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import FloatingOrbs from "../FloatingOrbs";
 import { getAdminLogs, getAdminSnapshots, getAdminUsers } from "../../services/api";
+import { useAuth } from "../../services/auth";
 
 export default function AdminDashboard() {
   const [tab, setTab] = useState<"logs" | "snapshots" | "users">("logs");
