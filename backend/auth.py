@@ -1,0 +1,111 @@
+import os
+import httpx
+from datetime import datetime, timedelta
+from typing import Optional
+from jose import JWTError, jwt
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from sqlmodel import Session, select
+from database import get_session
+from models import User
+from dotenv import load_dotenv
+
+load_dotenv()
+
+JWT_SECRET = os.getenv("JWT_SECRET", "vityarthi_dev_secret_key")
+JWT_ALGORITHM = "HS256"
+JWT_EXPIRY_DAYS = 7
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/google", auto_error=False)
+
+
+def create_access_token(data: dict) -> str:
+    payload = data.copy()
+    payload["exp"] = datetime.utcnow() + timedelta(days=JWT_EXPIRY_DAYS)
+    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+
+
+async def exchange_google_code(code: str, redirect_uri: str) -> Optional[dict]:
+    """Exchange Google auth code for user info."""
+    if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
+        return None
+
+    try:
+        # Step 1: Exchange code for tokens
+        with httpx.Client(timeout=10.0) as client:
+            token_resp = client.post(
+                "https://oauth2.googleapis.com/token",
+                data={
+                    "code": code,
+                    "client_id": GOOGLE_CLIENT_ID,
+                    "client_secret": GOOGLE_CLIENT_SECRET,
+                    "redirect_uri": redirect_uri,
+                    "grant_type": "authorization_code",
+                },
+            )
+            if token_resp.status_code != 200:
+                print("Token exchange failed:", token_resp.text)
+                return None
+            tokens = token_resp.json()
+            access_token = tokens.get("access_token")
+            if not access_token:
+                return None
+
+            # Step 2: Fetch user profile
+            user_resp = client.get(
+                "https://www.googleapis.com/oauth2/v2/userinfo",
+                headers={"Authorization": f"Bearer {access_token}"},
+            )
+            if user_resp.status_code != 200:
+                print("Profile fetch failed:", user_resp.text)
+                return None
+            profile = user_resp.json()
+            profile["sub"] = profile.get("id", profile.get("sub", ""))
+            return profile
+    except Exception as e:
+        print("Exception in Google exchange:", e)
+        return None
+
+
+def get_or_create_user(session: Session, google_info: dict) -> User:
+    """Get existing user or create new one from Google profile."""
+    google_sub = str(google_info.get("sub", google_info.get("id", "")))
+    user = session.exec(select(User).where(User.google_sub == google_sub)).first()
+    if not user:
+        user = User(
+            google_sub=google_sub,
+            email=google_info.get("email", ""),
+            name=google_info.get("name", "Student"),
+            picture=google_info.get("picture", ""),
+        )
+        session.add(user)
+        session.commit()
+        session.refresh(user)
+    return user
+
+
+def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    session: Session = Depends(get_session),
+) -> User:
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    if not token:
+        raise credentials_exception
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        user_id: int = payload.get("user_id")
+        if user_id is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+
+    user = session.get(User, user_id)
+    if not user:
+        raise credentials_exception
+    return user
