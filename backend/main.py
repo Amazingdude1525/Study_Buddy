@@ -92,19 +92,25 @@ async def google_login(
 
     user = get_or_create_user(db, google_info)
     
-    # [NEW] Log IP and Geographical Location
-    client_ip = request.client.host if request.client else None
+    # [NEW] Log IP and Geographical Location (Hardened for Proxy/Railway)
+    forwarded = request.headers.get("X-Forwarded-For")
+    if forwarded:
+        client_ip = forwarded.split(",")[0].strip()
+    else:
+        client_ip = request.client.host if request.client else None
+        
     city, country = None, None
-    if client_ip and client_ip not in ["127.0.0.1", "::1", "localhost"]:
+    if client_ip and client_ip not in ["127.0.0.1", "::1", "localhost", "0.0.0.0"]:
         try:
-            with httpx.Client(timeout=3.0) as client:
+            with httpx.Client(timeout=5.0) as client:
                 ip_resp = client.get(f"http://ip-api.com/json/{client_ip}")
                 if ip_resp.status_code == 200:
                     ip_data = ip_resp.json()
-                    city = ip_data.get("city")
-                    country = ip_data.get("country")
-        except Exception:
-            pass
+                    if ip_data.get("status") == "success":
+                        city = ip_data.get("city")
+                        country = ip_data.get("country")
+        except Exception as e:
+            print(f"⚠️ IP API ERROR for {client_ip}: {e}")
 
     from models import AccessLog
     log_entry = AccessLog(
