@@ -4,7 +4,7 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "python -m gunicorn --chdir backend main:app --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT",
+    "startCommand": "python3 -m gunicorn --chdir backend main:app --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT",
     "restartPolicyType": "ON_FAILURE"
   }
 }
