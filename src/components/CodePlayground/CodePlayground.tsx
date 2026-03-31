@@ -3,43 +3,58 @@ import Editor from '@monaco-editor/react';
 import { runCode } from '../../services/api';
 import { Play, RotateCcw, Code } from 'lucide-react';
 import { useTheme } from '../../services/theme';
+import { motion } from 'framer-motion';
 
-const STARTER = `# Welcome to the Vityarthi AI Terminal.
-# Fully integrated Python 3 kernel.
-
+const STARTER_CODE = {
+  python: `# Vityarthi AI Python Kernel v3.12
 def fibonacci(n):
-    if n <= 1:
-        return n
-    return fibonacci(n - 1) + fibonacci(n - 2)
+    return n if n <= 1 else fibonacci(n - 1) + fibonacci(n - 2)
 
-for i in range(10):
-    print(f"[{i}] Fibonacci computation: {fibonacci(i)}")
-`;
+for i in range(8):
+    print(f"Fib({i}): {fibonacci(i)}")`,
+  c: `#include <stdio.h>
+int main() {
+    printf("Vityarthi C Compiler Initialized...\\n");
+    for(int i=0; i<5; i++) printf("Loop cycle %d\\n", i);
+    return 0;
+}`,
+  cpp: `#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+    cout << "Vityarthi C++ Environment [g++ 15.2]" << endl;
+    vector<string> items = {"Logic", "Memory", "Speed"};
+    for(const auto& item : items) cout << "Processing " << item << "..." << endl;
+    return 0;
+}`,
+  java: `public class Main {
+    public static void main(String[] args) {
+        System.out.println("Vityarthi Java Neural Kernel [JDK 17]");
+        for(int i=1; i<=3; i++) {
+            System.out.println("Execution Layer: " + i);
+        }
+    }
+}`
+};
 
 const EXAMPLES = [
-  { label: 'Fibonacci', code: STARTER },
-  { label: 'Neural Net (Pseudo)', code: `# Neural network initialization
+  { label: 'Fibonacci', code: STARTER_CODE.python },
+  { label: 'Neural Net', code: `# Neural network progress simulation
 import random
+import time
 
-epochs = 5
-learning_rate = 0.01
-
-for epoch in range(1, epochs + 1):
-    loss = random.uniform(0.1, 0.9) / epoch
-    print(f"Epoch {epoch}/{epochs} [==============================] - loss: {loss:.4f} - accuracy: {1.0 - loss:.4f}")` },
-  { label: 'Dictionary', code: `# Word frequency counter
-text = "the quick brown fox jumps over the lazy dog"
-words = text.split()
-freq = {w: words.count(w) for w in words}
-
-for word, count in sorted(freq.items(), key=lambda x: -x[1]):
-    print(f"{word:12} {'█' * count} ({count})")` },
+for epoch in range(1, 6):
+    loss = random.uniform(0.1, 0.5) / epoch
+    print(f"Epoch {epoch}/5 - loss: {loss:.4f} - acc: {1.0-loss:.4f}")
+    time.sleep(0.1)` 
+  },
 ];
 
 export default function CodePlayground() {
   const { theme } = useTheme();
-  const [language, setLanguage] = useState<'python' | 'c' | 'cpp'>('python');
-  const [code, setCode] = useState(STARTER);
+  const [language, setLanguage] = useState<'python' | 'c' | 'cpp' | 'java'>('python');
+  const [code, setCode] = useState(STARTER_CODE.python);
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
   const [running, setRunning] = useState(false);
@@ -56,7 +71,7 @@ export default function CodePlayground() {
       setError(res.data.error);
       setTimedOut(res.data.timed_out);
     } catch {
-      setError('[FATAL] Connection refused. Is the Kernel alive on port 8000?');
+      setError('[FATAL] Neural Kernel Disconnect. Check backend log.');
     } finally {
       setRunning(false);
     }
@@ -78,41 +93,48 @@ export default function CodePlayground() {
         <div className="w-[50px]"></div> {/* Setup equal spacing */}
       </div>
 
-      <div className="flex items-center gap-2 px-4 py-2 bg-[#1f2335]/50 border-b border-white/5">
+      <div className="flex items-center gap-2 px-6 py-3 bg-black/20 border-b border-white/5 overflow-x-auto scrollbar-hide">
+        <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mr-2">Language:</div>
         <select 
           value={language}
           onChange={(e) => {
             const val = e.target.value as any;
             setLanguage(val);
-            if (val === 'c') setCode('#include <stdio.h>\\n\\nint main() {\\n    printf("Hello Vityarthi C Compiler!\\\\n");\\n    return 0;\\n}');
-            else if (val === 'cpp') setCode('#include <iostream>\\n\\nint main() {\\n    std::cout << "Hello Vityarthi C++ Compiler!" << std::endl;\\n    return 0;\\n}');
-            else setCode(STARTER);
+            setCode(STARTER_CODE[val as keyof typeof STARTER_CODE]);
           }}
-          className="bg-black/80 border border-white/10 rounded-md text-xs font-bold text-[#a9b1d6] px-2 py-1 outline-none focus:border-[#7aa2f7]/50 uppercase tracking-wider"
+          className="bg-primary/10 border border-primary/20 rounded-lg text-xs font-bold text-primary px-3 py-1.5 outline-none focus:ring-1 focus:ring-primary transition-all uppercase"
         >
-          <option value="python">Python 3</option>
-          <option value="c">GNU C (gcc)</option>
-          <option value="cpp">GNU C++ (g++)</option>
+          <option value="python" className="bg-[#0f172a]">Python 3.12</option>
+          <option value="c" className="bg-[#0f172a]">GNU C (gcc)</option>
+          <option value="cpp" className="bg-[#0f172a]">GNU C++ (g++)</option>
+          <option value="java" className="bg-[#0f172a]">Java 17 (openjdk)</option>
         </select>
         
-        <div className="w-px h-4 bg-white/10 mx-2" />
+        <div className="w-px h-6 bg-white/5 mx-4" />
 
-        {EXAMPLES.map(ex => (
-          <button key={ex.label} className={`px-3 py-1 text-xs rounded-md bg-white/5 hover:bg-white/10 text-[#a9b1d6] transition-colors mono-font ${language !== 'python' ? 'opacity-30 pointer-events-none' : ''}`} onClick={() => setCode(ex.code)}>
-            {ex.label}
-          </button>
-        ))}
+        <div className="flex gap-2">
+          {EXAMPLES.map(ex => (
+            <button 
+              key={ex.label}
+              className={`px-4 py-1.5 rounded-lg bg-white/5 border border-white/5 text-[10px] text-muted-foreground hover:bg-white/10 hover:text-white transition-all uppercase tracking-tighter ${language !== 'python' ? 'opacity-20 pointer-events-none' : ''}`}
+              onClick={() => setCode(ex.code)}
+            >
+              {ex.label}
+            </button>
+          ))}
+        </div>
+        
         <div className="flex-1" />
-        <button className="p-1.5 rounded-md hover:bg-white/10 text-[#a9b1d6] transition-colors" onClick={() => { setCode(''); setOutput(''); setError(''); }} title="Clear">
+        
+        <button className="p-2 rounded-lg bg-white/5 text-muted-foreground hover:text-white transition-all" onClick={() => { setCode(''); setOutput(''); setError(''); }}>
           <RotateCcw size={14} />
         </button>
         <button 
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#7aa2f7]/20 hover:bg-[#7aa2f7]/30 text-[#7aa2f7] border border-[#7aa2f7]/30 transition-all font-semibold text-xs"
+          className="flex items-center gap-2 px-6 py-2 rounded-xl bg-primary text-white font-bold text-xs glow-btn disabled:opacity-50 transition-all"
           onClick={run} 
           disabled={running}
         >
-          <Play size={12} className={running ? 'animate-pulse' : ''} />
-          {running ? 'EXECUTING...' : 'RUN.py'}
+          {running ? 'EXECUTING...' : 'EXECUTE'}
         </button>
       </div>
 
@@ -139,20 +161,22 @@ export default function CodePlayground() {
           />
         </div>
 
-        {/* Console Output */}
-        <div className="h-1/3 bg-[#000000]/60 border-t border-white/10 p-4 font-mono text-sm overflow-y-auto">
-          <div className="flex items-center gap-2 mb-2 text-[#7aa2f7]/70 text-xs">
-            <span>$ {language === 'python' ? 'python3 main.py' : language === 'c' ? 'gcc main.c -o exec && ./exec' : 'g++ main.cpp -o exec && ./exec'}</span>
-            {running && <span className="animate-pulse">_</span>}
+        <div className={`h-[35%] bg-black/80 backdrop-blur-xl border-t border-white/10 flex flex-col z-20 transition-all ${!output && !error && !running ? 'opacity-40 grayscale-[0.5]' : 'opacity-100'}`}>
+          <div className="px-6 py-3 flex items-center justify-between border-b border-white/5 shrink-0">
+            <div className="text-[10px] font-bold text-muted-foreground tracking-widest flex items-center gap-2">
+              <span className="text-primary font-mono">$</span> KERNEL_STDOUT
+            </div>
+            <div className="flex items-center gap-2">
+              <div className={`w-1.5 h-1.5 rounded-full ${running ? 'bg-yellow-500 animate-pulse' : 'bg-green-500'}`} />
+              <span className="text-[9px] uppercase font-bold text-muted-foreground tracking-tighter">{running ? 'Busy' : 'Idle'}</span>
+            </div>
           </div>
           
-          <div className="text-[#a9b1d6] whitespace-pre-wrap leading-relaxed">
-            {!output && !error && !timedOut && (
-              <span className="text-[#565f89] italic">Awaiting kernel command execution...</span>
-            )}
-            {timedOut && <span className="text-[#e0af68]">➜ [TIMEOUT] Execution exceeded 5000ms limit. Sandbox terminated.</span>}
-            {output && <span className="text-[#9ece6a]">{output}</span>}
-            {error && <span className="text-[#f7768e]">{error}</span>}
+          <div className="flex-1 overflow-y-auto p-6 font-mono text-sm leading-relaxed scrollbar-thin scrollbar-thumb-white/10">
+            {timedOut && <div className="text-orange-400 mb-2">[CRITICAL] TIMEOUT: Neural Kernel threshold exceeded.</div>}
+            {error && <div className="text-red-400 bg-red-500/5 p-3 rounded-lg border border-red-500/10 mb-4 whitespace-pre-wrap">{error}</div>}
+            {output && <div className="text-green-400 font-medium whitespace-pre-wrap">{output}</div>}
+            {!output && !error && !running && <div className="text-muted-foreground/30 italic">Kernel awaiting bytecode stream...</div>}
           </div>
         </div>
       </div>

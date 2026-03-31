@@ -16,6 +16,11 @@ class User(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     onboarded: bool = False
     is_admin: bool = False
+    face_id_snapshot: Optional[str] = None  # Base64 enrollment image
+    xp: int = Field(default=0)
+    level: int = Field(default=1)
+    streak: int = Field(default=0)
+    last_study_date: Optional[date] = None
 
 
 class PomodoroSession(SQLModel, table=True):
@@ -71,6 +76,7 @@ class UserUpdate(SQLModel):
     goals_text: Optional[str] = None
     subjects: Optional[str] = None
     onboarded: Optional[bool] = None
+    face_id_snapshot: Optional[str] = None
 
 
 class GoalCreate(SQLModel):

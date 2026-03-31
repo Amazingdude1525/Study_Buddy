@@ -49,7 +49,9 @@ def get_contributions(
         "data": result,
         "total_days_studied": len([r for r in result if r["minutes"] > 0]),
         "total_minutes": sum(r["minutes"] for r in result),
-        "current_streak": _calc_streak(result),
+        "current_streak": user.streak,
+        "xp": user.xp,
+        "level": user.level,
     }
 
 

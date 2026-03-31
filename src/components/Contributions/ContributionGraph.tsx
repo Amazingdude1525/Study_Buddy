@@ -3,9 +3,16 @@ import { getContributions } from '../../services/api';
 import { format, parseISO, subDays } from 'date-fns';
 
 interface ContribDay { date: string; minutes: number; sessions: number; }
-interface ContribData { data: ContribDay[]; total_days_studied: number; total_minutes: number; current_streak: number; }
+interface ContribData { 
+  data: ContribDay[]; 
+  total_days_studied: number; 
+  total_minutes: number; 
+  current_streak: number;
+  xp: number;
+  level: number;
+}
 
-function getLevel(minutes: number) {
+function getLevelColor(minutes: number) {
   if (minutes === 0) return 0;
   if (minutes < 30) return 1;
   if (minutes < 60) return 2;
@@ -18,23 +25,58 @@ export default function ContributionGraph() {
   const [tooltip, setTooltip] = useState<{text: string; x: number; y: number} | null>(null);
 
   useEffect(() => {
-    getContributions(52)
-      .then(r => setContrib(r.data))
-      .catch(() => {
-        // Mock data if backend not running
-        const mockData: ContribDay[] = [];
-        for (let i = 365; i >= 0; i--) {
-          const d = subDays(new Date(), i);
-          const min = Math.random() > 0.6 ? Math.floor(Math.random() * 180) : 0;
-          mockData.push({ date: format(d, 'yyyy-MM-dd'), minutes: min, sessions: Math.floor(min / 30) });
-        }
-        setContrib({ data: mockData, total_days_studied: mockData.filter(d => d.minutes > 0).length, total_minutes: mockData.reduce((a,b) => a+b.minutes, 0), current_streak: 3 });
+    console.log("NeuroFlow: Syncing Synapse Grid...");
+    const timeoutId = setTimeout(() => {
+      if (!contrib) {
+        console.warn("NeuroFlow: Synapse Grid connection delayed. Forcing local sync...");
+        loadMockData();
+      }
+    }, 4000);
+
+    const loadMockData = () => {
+      const mockData: ContribDay[] = [];
+      for (let i = 365; i >= 0; i--) {
+        const d = subDays(new Date(), i);
+        const min = Math.random() > 0.6 ? Math.floor(Math.random() * 180) : 0;
+        mockData.push({ date: format(d, 'yyyy-MM-dd'), minutes: min, sessions: Math.floor(min / 30) });
+      }
+      setContrib({ 
+        data: mockData, 
+        total_days_studied: mockData.filter(d => d.minutes > 0).length, 
+        total_minutes: mockData.reduce((a,b) => a+b.minutes, 0), 
+        current_streak: 3,
+        xp: 1250,
+        level: 2
       });
+    };
+
+    getContributions(52)
+      .then(r => {
+        clearTimeout(timeoutId);
+        setContrib(r.data);
+        console.log("NeuroFlow: Synapse Grid synced successfully.");
+      })
+      .catch((err) => {
+        clearTimeout(timeoutId);
+        console.error("Synapse Link Failure:", err);
+        loadMockData();
+      });
+
+    return () => clearTimeout(timeoutId);
   }, []);
 
-  if (!contrib) return <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>Loading...</div>;
+  useEffect(() => {
+    const refresh = () => {
+      getContributions(52)
+        .then(r => setContrib(r.data))
+        .catch(() => {});
+    };
+    window.addEventListener('refreshStats', refresh);
+    return () => window.removeEventListener('refreshStats', refresh);
+  }, []);
 
-  // Group into weeks (columns of 7)
+  if (!contrib) return <div className="h-64 flex items-center justify-center text-[10px] uppercase font-bold tracking-widest text-muted-foreground animate-pulse">Initializing Synapse Grid...</div>;
+
   const weeks: ContribDay[][] = [];
   let week: ContribDay[] = [];
   contrib.data.forEach((d, i) => {
@@ -47,22 +89,32 @@ export default function ContributionGraph() {
 
   const totalHours = Math.floor(contrib.total_minutes / 60);
   const totalMin = contrib.total_minutes % 60;
+  const xpInLevel = contrib.xp % 1000;
+  const xpProgress = (xpInLevel / 1000) * 100;
 
   return (
-    <div>
+    <div style={{ background: 'rgba(255,255,255,0.02)', padding: 16, borderRadius: 12, border: '1px solid rgba(255,255,255,0.05)' }}>
       {/* Stats row */}
-      <div style={{ display: 'flex', gap: 16, marginBottom: 16, flexWrap: 'wrap' }}>
-        <div>
-          <span style={{ fontSize: 22, fontWeight: 800 }}>{contrib.total_days_studied}</span>
-          <span style={{ fontSize: 12, color: 'var(--text-muted)', marginLeft: 4 }}>days studied</span>
+      <div style={{ display: 'flex', gap: 24, marginBottom: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+        <div style={{ flex: 1, minWidth: 200 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, alignItems: 'flex-end' }}>
+             <span style={{ fontSize: 11, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--primary)' }}>Level {contrib.level}</span>
+             <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{xpInLevel}/1000 XP balance</span>
+          </div>
+          <div style={{ height: 6, width: '100%', background: 'rgba(255,255,255,0.05)', borderRadius: 10, overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: `${xpProgress}%`, background: 'var(--primary)', boxShadow: '0 0 10px var(--primary)', transition: 'width 1s ease-out' }} />
+          </div>
         </div>
-        <div>
-          <span style={{ fontSize: 22, fontWeight: 800 }}>{totalHours}h {totalMin}m</span>
-          <span style={{ fontSize: 12, color: 'var(--text-muted)', marginLeft: 4 }}>total</span>
-        </div>
-        <div>
-          <span style={{ fontSize: 22, fontWeight: 800, color: 'var(--accent)' }}>{contrib.current_streak}</span>
-          <span style={{ fontSize: 12, color: 'var(--text-muted)', marginLeft: 4 }}>day streak 🔥</span>
+        
+        <div style={{ display: 'flex', gap: 20 }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 24, fontWeight: 900 }}>{contrib.current_streak}</div>
+            <div style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Day Streak 🔥</div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 24, fontWeight: 900 }}>{totalHours}h {totalMin}m</div>
+            <div style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Focus Time</div>
+          </div>
         </div>
       </div>
 
@@ -86,7 +138,7 @@ export default function ContributionGraph() {
               {week.map((day, di) => (
                 <div
                   key={di}
-                  className={`contrib-cell contrib-${getLevel(day.minutes)}`}
+                  className={`contrib-cell contrib-${getLevelColor(day.minutes)}`}
                   style={{ width: 12, height: 12 }}
                   onMouseEnter={e => setTooltip({
                     text: `${day.date}: ${day.minutes}m (${day.sessions} sessions)`,

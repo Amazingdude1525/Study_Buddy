@@ -1,14 +1,30 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Brain, Clock, Zap, Target } from "lucide-react";
-
-const stats = [
-  { label: "Focus Score", value: "94%", icon: Brain, glow: "glow-text" },
-  { label: "Study Hours", value: "6.5h", icon: Clock, glow: "glow-text-cyan" },
-  { label: "Streak", value: "12d", icon: Zap, glow: "glow-text-pink" },
-  { label: "Goals Met", value: "8/10", icon: Target, glow: "glow-text-cyan" },
-];
+import { pomodoroStats, getContributions } from "../services/api";
 
 export default function StatsWidget() {
+  const [stats, setStats] = useState([
+    { label: "Focus Score", value: "94%", icon: Brain, glow: "glow-text" },
+    { label: "Study Hours", value: "0h", icon: Clock, glow: "glow-text-cyan" },
+    { label: "Streak", value: "0d", icon: Zap, glow: "glow-text-pink" },
+    { label: "Goals Met", value: "0/0", icon: Target, glow: "glow-text-cyan" },
+  ]);
+
+  useEffect(() => {
+    Promise.all([
+      pomodoroStats(),
+      getContributions()
+    ]).then(([statsRes, contribRes]) => {
+      setStats([
+        { label: "Focus Score", value: "94%", icon: Brain, glow: "glow-text" },
+        { label: "Study Hours", value: `${statsRes.data.total_hours}h`, icon: Clock, glow: "glow-text-cyan" },
+        { label: "Streak", value: `${contribRes.data.current_streak}d`, icon: Zap, glow: "glow-text-pink" },
+        { label: "Goals Met", value: "0/0", icon: Target, glow: "glow-text-cyan" },
+      ]);
+    }).catch(console.error);
+  }, []);
+
   return (
     <>
       {stats.map((s, i) => (

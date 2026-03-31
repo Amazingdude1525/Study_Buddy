@@ -55,7 +55,7 @@ export default function DeveloperProfile() {
           animate={{ opacity: 1, x: 0 }}
           className="glass-card p-8 flex flex-col items-center relative overflow-hidden group"
         >
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
           
           <div className="relative w-40 h-40 mb-6 rounded-full p-1 bg-gradient-to-tr from-primary to-[hsl(185,80%,55%)] shadow-[0_0_30px_hsl(263,70%,50%/0.3)]">
             <img 
@@ -72,7 +72,7 @@ export default function DeveloperProfile() {
           <h2 className="text-2xl font-bold glow-text mb-1">Prateek Das</h2>
           <p className="text-sm text-muted-foreground mono-font mb-6">Full Stack AI Developer</p>
 
-          <div className="flex gap-4">
+          <div className="flex gap-4 relative z-[60] pointer-events-auto">
             <a href="https://github.com/Amazingdude1525" target="_blank" rel="noreferrer" className="p-3 rounded-full bg-secondary hover:bg-white/10 hover:text-white transition-colors border border-border/50">
               <Code className="w-5 h-5" />
             </a>

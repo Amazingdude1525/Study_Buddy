@@ -4,7 +4,7 @@ from sqlmodel import Session, select
 from datetime import date, datetime
 from database import get_session
 from models import Goal, GoalCreate, GoalUpdate, ContribDay, PomodoroSession
-from auth import get_current_user, User
+from auth import get_current_user, User, update_user_stats
 
 router = APIRouter(prefix="/goals", tags=["goals"])
 

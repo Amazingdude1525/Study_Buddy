@@ -4,7 +4,7 @@ from sqlmodel import Session, select
 from datetime import date, datetime, timedelta
 from database import get_session
 from models import PomodoroSession, PomodoroCreate, PomodoroComplete, ContribDay
-from auth import get_current_user, User
+from auth import get_current_user, User, update_user_stats
 
 router = APIRouter(prefix="/pomodoro", tags=["pomodoro"])
 
@@ -52,6 +52,7 @@ def complete_session(
     session.commit()
     if data.completed:
         _update_contrib(session, user.id, pomo.duration_min)
+        update_user_stats(session, user, minutes=pomo.duration_min)
     return {"ok": True, "session_id": pomo.id}
 
 

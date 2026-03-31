@@ -1,133 +1,143 @@
-import { motion } from "framer-motion";
-import { Activity, LogOut } from "lucide-react";
 import { useAuth } from "../../services/auth";
 import StatsWidget from "../StatsWidget";
+import DigitalClock from "./DigitalClock";
+import { motion } from "framer-motion";
+import { Activity, Zap, Target, Flame } from "lucide-react";
+import ContributionGraph from "../Contributions/ContributionGraph";
 
 export default function DashboardOverview() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-8">
-      {/* Header */}
+    <div className="w-full max-w-7xl mx-auto space-y-10 pb-10">
+      {/* Dynamic Hero Header */}
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-start justify-between"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="relative overflow-hidden glass-card p-10 border-none bg-gradient-to-br from-primary/10 via-background to-black"
       >
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Activity className="h-4 w-4 glow-text-cyan" />
-            <span className="text-xs text-muted-foreground mono-font uppercase tracking-widest">Live Updates</span>
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Good evening, <span className="glow-text">{user?.name || "Scholar"}</span>
-          </h1>
+        <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+          <Zap className="h-48 w-48 text-primary animate-pulse" />
         </div>
-        <button
-          onClick={logout}
-          className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all"
-        >
-          <LogOut className="h-4 w-4" />
-          <span>Logout</span>
-        </button>
+        
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <span className="px-3 py-1 bg-primary/20 border border-primary/30 rounded-full text-[10px] font-black text-primary uppercase tracking-[0.2em] shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+                Rank: Neural Core {user?.level || 1}
+              </span>
+              <div className="flex items-center gap-1.5 text-orange-400">
+                <Flame className="h-4 w-4 fill-orange-400/20" />
+                <span className="text-xs font-bold font-mono">{user?.streak || 0} DAY STREAK</span>
+              </div>
+            </div>
+            
+            <h1 className="text-4xl md:text-5xl font-black tracking-tight leading-none">
+              Welcome back,<br/>
+              <span className="gradient-text">{user?.name || "Scholar"}</span>
+            </h1>
+            
+            <div className="flex items-center gap-4 pt-2">
+               <div className="flex -space-x-2">
+                 {[1,2,3].map(i => (
+                   <div key={i} className="w-8 h-8 rounded-full border-2 border-background bg-secondary flex items-center justify-center text-[10px] font-bold">
+                     #{i}
+                   </div>
+                 ))}
+               </div>
+               <span className="text-xs text-muted-foreground font-medium italic opacity-60">
+                 You are in the top 12% this week
+               </span>
+            </div>
+          </div>
+          
+          <div className="glass-card p-6 border-white/5 bg-black/40 shadow-2xl backdrop-blur-xl">
+             <DigitalClock />
+             <div className="mt-4 pt-4 border-t border-white/5 flex gap-6">
+                <div className="text-center">
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-1">XP Points</p>
+                  <p className="text-xl font-black glow-text-cyan">{user?.xp || 0}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-1">Global Level</p>
+                  <p className="text-xl font-black glow-text-pink">{user?.level || 1}</p>
+                </div>
+             </div>
+          </div>
+        </div>
       </motion.div>
 
-      {/* Stats row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatsWidget />
-      </div>
+      {/* Grid Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Stats column */}
+        <div className="lg:col-span-2 space-y-6">
+           <ContributionGraph />
+           
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="glass-card p-8 group hover:bg-white/5 transition-colors cursor-pointer">
+                <h3 className="font-black text-xs text-muted-foreground uppercase tracking-[0.3em] mb-6 flex items-center gap-2">
+                   <Target className="h-4 w-4 text-pink-500" /> Goal Trajectory
+                </h3>
+                <div className="space-y-4">
+                  <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                    <motion.div animate={{ width: '65%' }} className="h-full bg-pink-500 shadow-[0_0_15px_pink]" />
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    You've completed <span className="text-white font-bold">4 out of 6</span> weekly challenges.
+                  </p>
+                </div>
+              </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Quick schedule card */}
-        <div className="glass-card p-6">
-          <h3 className="font-semibold text-sm mb-4 glow-text-cyan">Today's Schedule</h3>
-          <div className="space-y-3">
-            {[
-              { time: "09:00", subject: "Physics", status: "done" },
-              { time: "11:00", subject: "Chemistry", status: "done" },
-              { time: "14:00", subject: "React", status: "current" },
-              { time: "16:00", subject: "Review", status: "upcoming" },
-            ].map((item, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.1 }}
-                className="flex items-center gap-3"
-              >
-                <span className="mono-font text-xs text-muted-foreground w-12">{item.time}</span>
-                <div
-                  className={`h-2 w-2 rounded-full ${
-                    item.status === "done"
-                      ? "bg-[hsl(185,80%,55%)]"
-                      : item.status === "current"
-                      ? "bg-[hsl(263,70%,60%)] animate-pulse shadow-[0_0_10px_hsl(263,70%,60%)]"
-                      : "bg-muted-foreground/30"
-                  }`}
-                />
-                <span className={`text-sm ${item.status === "current" ? "glow-text font-medium" : "text-muted-foreground"}`}>
-                  {item.subject}
-                </span>
-              </motion.div>
-            ))}
-          </div>
+              <div className="glass-card p-8 group hover:bg-white/5 transition-colors cursor-pointer">
+                <h3 className="font-black text-xs text-muted-foreground uppercase tracking-[0.3em] mb-6 flex items-center gap-2">
+                   <Activity className="h-4 w-4 text-cyan-400" /> Focus Efficiency
+                </h3>
+                <div className="flex items-end gap-1 h-12">
+                   {[40, 70, 45, 90, 65, 80, 50].map((h, i) => (
+                     <motion.div 
+                       key={i}
+                       initial={{ height: 0 }}
+                       animate={{ height: `${h}%` }}
+                       transition={{ delay: i * 0.05 }}
+                       className="flex-1 bg-cyan-400/40 rounded-t-sm"
+                     />
+                   ))}
+                </div>
+                <p className="text-xs text-muted-foreground mt-4">
+                  Efficiency is <span className="text-cyan-400 font-bold">+12%</span> higher today.
+                </p>
+              </div>
+           </div>
         </div>
 
-        {/* AI Insights & Notifications */}
-        <div className="glass-card p-6">
-          <h3 className="font-semibold text-sm mb-4 glow-text-pink">AI Insights</h3>
-          <div className="space-y-3">
-            <div className="p-3 rounded-lg bg-[hsl(263,70%,50%)]/10 border border-[hsl(263,70%,50%)]/20 shadow-[0_0_15px_hsl(263,70%,50%/0.1)]">
-              <p className="text-xs glow-text font-medium">Peak Performance Window</p>
-              <p className="text-xs text-muted-foreground mt-1">Your focus peaks between 2-4 PM. Schedule difficult topics here.</p>
-            </div>
-            <div className="p-3 rounded-lg bg-[hsl(185,80%,55%)]/10 border border-[hsl(185,80%,55%)]/20 shadow-[0_0_15px_hsl(185,80%,55%/0.1)]">
-              <p className="text-xs glow-text-cyan font-medium">Study Pattern</p>
-              <p className="text-xs text-muted-foreground mt-1">You retain 23% more with spaced repetition. Try 25-min blocks.</p>
-            </div>
-          </div>
+        {/* Info Column */}
+        <div className="space-y-6">
+           <div className="glass-card p-8 border-t-primary/30">
+              <h3 className="font-bold text-xs uppercase tracking-widest mb-6 glow-text-cyan flex items-center gap-2">
+                <Zap className="h-4 w-4" /> Neuro Signals
+              </h3>
+              <div className="space-y-6">
+                <div className="flex gap-4">
+                  <div className="h-10 w-1 bg-primary/40 rounded-full shadow-[0_0_10px_purple]" />
+                  <div>
+                    <p className="text-[11px] font-black uppercase text-primary mb-1">Peak Flow</p>
+                    <p className="text-xs text-muted-foreground">Highest concentration detected at 10:45 AM.</p>
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <div className="h-10 w-1 bg-cyan-400/40 rounded-full shadow-[0_0_10px_cyan]" />
+                  <div>
+                    <p className="text-[11px] font-black uppercase text-cyan-400 mb-1">Study Alert</p>
+                    <p className="text-xs text-muted-foreground">It's time for spaced repetition of Physics.</p>
+                  </div>
+                </div>
+              </div>
+           </div>
+
+           <div className="glass-card p-8 border-l-orange-500/20">
+              <StatsWidget />
+           </div>
         </div>
-      </div>
-
-      {/* GitHub Squares Contribution Graph */}
-      <GithubContributionGraph />
-
-    </div>
-  );
-}
-
-function GithubContributionGraph() {
-  const weeks = 42;
-  const days = 7;
-  const squares = Array.from({length: weeks * days}).map(() => {
-    const val = Math.random();
-    return val > 0.8 ? 'bg-[rgba(168,85,247,0.8)] shadow-[0_0_8px_rgba(168,85,247,0.5)]' : 
-           val > 0.5 ? 'bg-[rgba(168,85,247,0.5)]' : 
-           val > 0.2 ? 'bg-[rgba(168,85,247,0.3)]' : 
-           'bg-black/20 border border-white/5';
-  });
-
-  return (
-    <div className="glass-card p-6 border-t border-t-primary/20 bg-gradient-to-br from-background to-black/40">
-      <h3 className="font-bold text-sm mb-4 glow-text-cyan flex items-center gap-2">
-        <Activity className="h-4 w-4" /> Focus Contribution Graph
-      </h3>
-      <div className="flex gap-1.5 overflow-x-auto pb-4 scrollbar-hide opacity-80 hover:opacity-100 transition-opacity">
-        {Array.from({length: weeks}).map((_, w) => (
-          <div key={w} className="flex flex-col gap-1.5 hover:scale-105 transition-transform duration-200">
-             {Array.from({length: days}).map((_, d) => (
-               <div key={d} className={`w-3.5 h-3.5 rounded-sm ${squares[w * days + d]}`} title="Focus Sessions" />
-             ))}
-          </div>
-        ))}
-      </div>
-      <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground font-mono justify-end">
-        <span>Less</span>
-        <div className="w-3.5 h-3.5 rounded-sm bg-black/20 border border-white/5"></div>
-        <div className="w-3.5 h-3.5 rounded-sm bg-[rgba(168,85,247,0.3)]"></div>
-        <div className="w-3.5 h-3.5 rounded-sm bg-[rgba(168,85,247,0.5)]"></div>
-        <div className="w-3.5 h-3.5 rounded-sm bg-[rgba(168,85,247,0.8)] shadow-[0_0_8px_rgba(168,85,247,0.5)]"></div>
-        <span>More</span>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageSquare, Send, Bot, User, Mic } from "lucide-react";
+import { streamAdvisorChat } from "../../services/api";
 
 export default function Chatbot() {
   const [messages, setMessages] = useState([
@@ -48,54 +49,36 @@ export default function Chatbot() {
     setInput("");
     setMessages((prev) => [...prev, { role: "user", text: userMsg }]);
     setIsTyping(true);
+    setMessages((prev) => [...prev, { role: "assistant", text: "" }]);
 
+    let aiMsg = "";
     try {
-      const token = localStorage.getItem("vityarthi_token");
-      const res = await fetch("http://localhost:8000/advisor/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
+      console.log("NeuroFlow: Initiating AI stream...");
+      streamAdvisorChat(
+        userMsg,
+        "focused",
+        "",
+        (chunk) => {
+          aiMsg += chunk;
+          setMessages((prev) => {
+            const newMsgs = [...prev];
+            newMsgs[newMsgs.length - 1].text = aiMsg;
+            return newMsgs;
+          });
         },
-        body: JSON.stringify({ message: userMsg, mood: "focused" })
-      });
-
-      if (!res.body) throw new Error("No response body");
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder("utf-8");
-
-      let aiMsg = "";
-      setMessages((prev) => [...prev, { role: "assistant", text: "" }]);
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split('\\n');
-        
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const dataStr = line.substring(6).trim();
-            if (dataStr === '[DONE]') break;
-            try {
-              const data = JSON.parse(dataStr);
-              if (data.text) {
-                aiMsg += data.text;
-                setMessages((prev) => {
-                  const newMsgs = [...prev];
-                  newMsgs[newMsgs.length - 1].text = aiMsg;
-                  return newMsgs;
-                });
-              }
-            } catch (err) {}
-          }
+        () => {
+          setIsTyping(false);
+          console.log("NeuroFlow: AI stream sync complete.");
         }
-      }
+      );
     } catch (err) {
-      console.error(err);
-      setMessages((prev) => [...prev, { role: "assistant", text: "Connection error. I am currently offline." }]);
-    } finally {
+      console.error("AI Link Failure", err);
       setIsTyping(false);
+      setMessages((prev) => {
+        const newMsgs = [...prev];
+        newMsgs[newMsgs.length - 1].text = "⚠️ CONNECTION ERROR: The neural link was interrupted. Please check your backend connection.";
+        return newMsgs;
+      });
     }
   };
 
@@ -115,10 +98,10 @@ export default function Chatbot() {
               key={i}
               className={`flex gap-3 ${m.role === "user" ? "flex-row-reverse" : ""}`}
             >
-              <div className={`p-2 rounded-full h-8 w-8 flex items-center justify-center shrink-0 ${m.role === "user" ? "bg-primary/20 text-primary" : "bg-[hsl(185,80%,55%)]/20 text-[hsl(185,80%,55%)]"}`}>
+              <div className={`p-2 rounded-full h-8 w-8 flex items-center justify-center shrink-0 ${m.role === "user" ? "bg-primary/20 text-primary" : "bg-[hsl(var(--glow-cyan))]/20 text-[hsl(var(--glow-cyan))]"}`}>
                 {m.role === "user" ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
               </div>
-              <div className={`p-3 rounded-2xl text-sm max-w-[80%] ${m.role === "user" ? "bg-primary text-primary-foreground rounded-tr-sm" : "bg-card border border-border/40 rounded-tl-sm text-foreground"}`}>
+              <div className={`p-3 rounded-2xl text-sm max-w-[80%] ${m.role === "user" ? "bg-primary text-primary-foreground rounded-tr-sm shadow-[0_0_15px_rgba(139,92,246,0.3)]" : "bg-secondary/40 border border-border/40 rounded-tl-sm text-foreground backdrop-blur-sm"}`}>
                 {m.text}
               </div>
             </motion.div>
@@ -126,14 +109,14 @@ export default function Chatbot() {
         </AnimatePresence>
       </div>
 
-      <div className="p-4 border-t border-border/40 bg-card">
+      <div className="p-4 border-t border-border/40 bg-background/80 backdrop-blur-md">
         <form onSubmit={handleSend} className="relative">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask your study buddy..."
-            className="w-full bg-secondary/50 border border-border/50 rounded-full pl-4 pr-12 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary relative z-50 pointer-events-auto text-foreground"
+            className="w-full bg-secondary/80 border border-primary/30 rounded-2xl pl-4 pr-12 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary relative z-50 pointer-events-auto text-foreground shadow-[inset_0_0_10px_rgba(0,0,0,0.2)]"
           />
           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
             <button 

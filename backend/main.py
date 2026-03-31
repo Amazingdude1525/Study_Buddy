@@ -1,5 +1,6 @@
 import os
 from fastapi import FastAPI, HTTPException, Depends, Request
+import traceback
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -14,7 +15,9 @@ try:
 except Exception as e:
     print(f"⚠️ DATABASE WARNING: {e}")
 import httpx
-from auth import exchange_google_code, get_or_create_user, create_access_token
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+from auth import get_or_create_user, create_access_token, GOOGLE_CLIENT_ID
 from routers import users, sentiment, music, pomodoro, goals, contributions, advisor, resources, sandbox, admin
 from sqlmodel import Session, select
 from models import User, AccessLog
@@ -58,19 +61,31 @@ def startup():
 
 # ── Auth endpoint ──────────────────────────────────────────────────────────────
 
-class GoogleLoginPayload(BaseModel):
-    code: str  # Google auth-code from frontend
-
 @app.post("/auth/google")
 async def google_login(
-    payload: GoogleLoginPayload,
+    payload: dict,
     request: Request,
     db: Session = Depends(get_session),
 ):
-    """Exchange Google auth code for JWT."""
-    google_info = await exchange_google_code(payload.code, "postmessage")
-    if not google_info:
-        raise HTTPException(status_code=401, detail="Invalid Google token")
+    """Verify Google ID token (credential) and return JWT."""
+    credential = payload.get("credential")
+    if not credential:
+        raise HTTPException(status_code=400, detail="Missing Google credential")
+
+    try:
+        # Verify the ID token
+        idinfo = id_token.verify_oauth2_token(
+            credential, 
+            google_requests.Request(), 
+            GOOGLE_CLIENT_ID
+        )
+        # google_info contains 'email', 'name', 'picture', 'sub', etc.
+        google_info = idinfo
+    except Exception as e:
+        print("❌ GOOGLE AUTH CRITICAL ERROR:")
+        traceback.print_exc()
+        raise HTTPException(status_code=401, detail=f"Google Verification Error: {str(e)}")
+
     user = get_or_create_user(db, google_info)
     
     # [NEW] Log IP and Geographical Location
@@ -108,6 +123,9 @@ async def google_login(
             "picture": user.picture,
             "onboarded": user.onboarded,
             "is_admin": user.is_admin,
+            "xp": user.xp,
+            "level": user.level,
+            "streak": user.streak,
         },
     }
 

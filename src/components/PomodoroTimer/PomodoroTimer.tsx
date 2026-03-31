@@ -51,6 +51,7 @@ export default function PomodoroTimer({ subject = 'Focus' }: { subject?: string 
     if (sessionId) {
       try {
         await completePomodoro(sessionId, true);
+        window.dispatchEvent(new Event('refreshStats'));
         setShowSuccess(true);
         setTimeout(() => {
           setShowSuccess(false);

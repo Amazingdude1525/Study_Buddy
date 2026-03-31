@@ -1,233 +1,116 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Brain, Sparkles, ShieldCheck, Mail, Lock, User, LogIn, Github, Activity, LayoutDashboard, AlertCircle, Loader2 } from 'lucide-react';
-import { useGoogleLogin } from '@react-oauth/google';
+import { Brain, AlertCircle, Loader2 } from 'lucide-react';
+import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../../services/auth';
-import { authGoogle, emailLogin, emailRegister } from '../../services/api';
-import FloatingOrbs from '../FloatingOrbs';
-
-const features = [
-  { icon: <Brain className="h-4 w-4" />, label: 'AI Advisor' },
-  { icon: <Activity className="h-4 w-4" />, label: 'Face Scan' },
-  { icon: <Sparkles className="h-4 w-4" />, label: 'Smart Lofi' },
-  { icon: <LayoutDashboard className="h-4 w-4" />, label: 'Daily Goals' },
-];
-
-const GOOGLE_LOGO = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0OCA0OCI+PHBhdGggZmlsbD0iI0ZGQzEwNyIgZD0iTTQzLjYxMSwyMC4wODNINDJWMjBIMjR2OGgxMS4zMDNjLTEuNjQ5LDQuNjU3LTYuMDgsMC04LTEyLjAzNyIvPjxwYXRoIGZpbGw9IiNGRjNEMDAiIGQ9Ik02LjMwNiwzMS42MzZsNi41NzEtNC44MThDMTQuNjU2LDMwLjE0LDE5LjA3OCwzMiwyNCwzMmM0Ljg3OSwwLDkuMjEtMS44MDgsMTIuNTI5LTQuNzM2bDYuODc0LDQuNjk2QzM5LjEyNCw0MS40MDgsMzIuMDE3LDQ0LDI0LDQ0QzE2LjM5OCw0NCw5LjY1Miw0MS4wMDYsNi4zMDYsMzEuNjM2eiIvPjxwYXRoIGZpbGw9IiM0Q0FGNTAiIGQ9Ik0yNCw0NGM3LjQ3NSwwLDEzLjkzLTIuNjY3LDE4LjgxNy02Ljk4bC03LjE4NC00Ljg5QzMzLjE5MSwzNS4xODksMjguNzI0LDM2LDI0LDM2Yy00Ljg0MywwLTkuMzctMS45MzYtMTIuNTQzLTUuMDE0TDUsMzUuNzdDOS41ODksNDAuNTQ2LDE2LjQxNiw0NCwyNCw0NHoiLz48cGF0aCBmaWxsPSIjMTU2NUMwIiBkPSJNNDMuNjExLDIwLjA4M0g0MlYyMEgyNHY4aDExLjMwM0MzMy40MDcsMzEuMzU5LDI5LjEzLDM0LDI0LDM0Yy02LjYyNywwLTEyLTUuMzczLTEyLTEyczUuMzczLTEyLDEyLTEyYzMuMDU5LDAsNS44NDIsMS4xNTQsNy45NjEsMy4wMzlsNS42NTctNS42NThDMzguNzQsOC4zNzUsMzEuNzA0LDUsMjQsNUMxMi45NSw1LDQsMTMuOTUsNCwyNXM4Ljk1LDIwLDIwLDIwYzExLjA0NSwwLDE4LjgxOS04LjU2NywxOC44MTktMjAuNjY5Yy0uMDAyLTEwLjAzNi04Ljc4Mi0xOS4zMTQtMTkuMjA4LTE5LjMxNHoiLz48L3N2Zz4=`;
+import api from '../../services/api';
+import NeuralNetworkBackground from './NeuralNetworkBackground';
 
 export default function LoginPage() {
   const { login } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [isRegister, setIsRegister] = useState(false);
 
-  const handleEmailSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !password || (isRegister && !name)) {
-      return setError('Please fill all required fields.');
-    }
+  const handleGoogleSuccess = async (credential: string) => {
     setLoading(true);
     setError('');
     try {
-      const res = isRegister 
-        ? await emailRegister({ email, password, name })
-        : await emailLogin({ email, password });
-      login(res.data.access_token, res.data.user);
+      const res = await api.post('/auth/google', { credential });
+      const { access_token, user } = res.data;
+      login(access_token, user);
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Authentication failed. Please check credentials.');
+      const detail = err.response?.data?.detail;
+       const message = err.message;
+      setError(`Auth Sync Failure: ${detail || message}`);
     } finally {
       setLoading(false);
     }
   };
 
-  const googleLogin = useGoogleLogin({
-    flow: 'auth-code',
-    onSuccess: async (codeResponse) => {
-      setLoading(true);
-      setError('');
-      try {
-        // Send the auth code to backend — backend exchanges it for user info
-        const res = await authGoogle(codeResponse.code);
-        const { access_token, user } = res.data;
-        login(access_token, user);
-      } catch (err: unknown) {
-        const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
-        setError(msg || 'Login failed. Make sure the Python backend is running on port 8000.');
-      } finally {
-        setLoading(false);
-      }
-    },
-    onError: (err) => {
-      console.error('Google login error:', err);
-      setError('Google sign-in was cancelled or failed. Please try again.');
-    },
-  });
-
   return (
-    <div 
-      className="mesh-gradient-bg flex items-center justify-center p-4 min-h-screen"
-      style={{ 
-        background: 'linear-gradient(135deg, #000 0%, #1a0b2e 40%, #050505 70%, #0a1a1a 100%)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh'
-      }}
-    >
-      <FloatingOrbs />
+    <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-[#020205] selection:bg-primary/30">
+      <NeuralNetworkBackground />
       
+      {/* Decorative Blur */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[120px] animate-pulse" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
+
       <motion.div 
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-[420px] relative z-20"
+        className="w-full max-w-[400px] relative z-20 px-6"
       >
-        <div 
-          className="glass-card p-10 relative overflow-hidden group"
-          style={{
-            background: 'rgba(255, 255, 255, 0.05)',
-            backdropFilter: 'blur(20px)',
-            borderRadius: '1.5rem',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            padding: '2.5rem'
-          }}
-        >
-          <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div className="glass-card p-12 relative overflow-hidden group shadow-[0_0_80px_rgba(0,0,0,0.6)] border-white/5 flex flex-col items-center bg-black/40 backdrop-blur-2xl">
+          <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
           
-            <div className="flex flex-col items-center mb-8">
-              <div className="absolute top-4 right-4 text-[10px] font-bold text-muted-foreground/30 uppercase tracking-[0.2em]">V2.0 Premium</div>
-              <motion.div 
-              whileHover={{ rotate: 360 }}
-              transition={{ duration: 1 }}
-              className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center mb-4 border border-primary/30"
+          <div className="mb-10">
+            <motion.div 
+              animate={{ rotate: 360 }}
+              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              className="p-4 rounded-3xl bg-primary/10 border border-primary/20 shadow-[0_0_30px_rgba(139,92,246,0.2)]"
             >
-              <Brain className="h-8 w-8 text-primary" style={{ filter: 'drop-shadow(0 0 8px rgba(139, 92, 246, 0.6))' }} />
+              <Brain className="h-10 w-10 text-primary" />
             </motion.div>
-            <h1 className="text-4xl font-bold tracking-tighter mb-2">
-              <span className="gradient-text" style={{ background: 'linear-gradient(135deg, #8b5cf6, #06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>!!! PREMIUM AI VITYARTHI !!!</span>
+          </div>
+
+          <div className="text-center mb-12">
+            <h1 className="text-5xl font-black tracking-tighter mb-2 text-white italic">
+              Neuro<span className="text-primary not-italic">Flow</span>
             </h1>
-            <p className="text-muted-foreground text-sm text-center">
-              Elevate your focus with neural study patterns.
+            <p className="text-[10px] font-bold text-white/60 uppercase tracking-[0.5em] ml-1">
+              Neural Sync Protocol
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-2 justify-center mb-10">
-            {features.map((f, i) => (
-              <motion.span 
-                key={i}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 + 0.3 }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary/50 border border-border/30 text-[10px] uppercase tracking-widest font-bold text-muted-foreground"
-                style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)' }}
-              >
-                {f.icon} {f.label}
-              </motion.span>
-            ))}
-          </div>
-
-          <form onSubmit={handleEmailSubmit} className="space-y-4 mb-6">
-            {isRegister && (
-              <div className="relative group">
-                <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                <input 
-                  type="text" 
-                  placeholder="Full Name" 
-                  value={name} 
-                  onChange={e => setName(e.target.value)} 
-                  disabled={loading}
-                  className="w-full bg-secondary/50 border border-border/50 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:bg-secondary/80 transition-all"
+          <div className="w-full space-y-8">
+            <div className="flex justify-center">
+              {loading ? (
+                <div className="flex flex-col items-center gap-4">
+                  <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                  <span className="text-[11px] font-bold text-primary/60 uppercase tracking-widest animate-pulse">
+                    Synchronizing...
+                  </span>
+                </div>
+              ) : (
+                <GoogleLogin 
+                  onSuccess={(res) => res.credential && handleGoogleSuccess(res.credential)}
+                  onError={() => setError('Google Authentication Failed')}
+                  useOneTap
+                  theme="filled_black"
+                  shape="pill"
+                  size="large"
+                  width="300"
                 />
-              </div>
-            )}
-            <div className="relative group">
-              <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-              <input 
-                type="email" 
-                placeholder="Email Address" 
-                value={email} 
-                onChange={e => setEmail(e.target.value)} 
-                disabled={loading}
-                className="w-full bg-secondary/50 border border-border/50 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:bg-secondary/80 transition-all"
-              />
+              )}
             </div>
-            <div className="relative group">
-              <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-              <input 
-                type="password" 
-                placeholder="Password" 
-                value={password} 
-                onChange={e => setPassword(e.target.value)} 
-                disabled={loading}
-                className="w-full bg-secondary/50 border border-border/50 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:bg-secondary/80 transition-all"
-              />
-            </div>
-
-            <button 
-              type="submit" 
-              disabled={loading} 
-              className="w-full bg-primary hover:opacity-90 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-[0_10px_20px_-10px_rgba(99,102,241,0.5)] glow-btn"
-            >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogIn className="h-4 w-4" />}
-              {loading ? 'Processing...' : (isRegister ? 'Create Scholar Account' : '!!! AUTHENTICATE NOW !!!')}
-            </button>
-          </form>
-
-          <div className="text-center mb-8">
-            <button 
-              type="button" 
-              onClick={() => setIsRegister(!isRegister)} 
-              className="text-xs text-muted-foreground hover:text-primary transition-colors font-medium"
-            >
-              {isRegister ? 'Already registered? System Login' : 'New Scholar? Register Profile'}
-            </button>
           </div>
-
-          <div className="relative flex items-center gap-4 mb-8">
-            <div className="h-px bg-border flex-1" />
-            <span className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.2em]">Neural Sync</span>
-            <div className="h-px bg-border flex-1" />
-          </div>
-
-          <button
-            onClick={() => googleLogin()}
-            disabled={loading}
-            className="w-full flex items-center justify-center gap-3 bg-white text-black py-3 rounded-xl font-bold text-sm hover:bg-white/90 transition-all border border-white/20"
-          >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin text-primary" /> : <img src={GOOGLE_LOGO} alt="Google" className="h-4 w-4" />}
-            {loading ? 'Syncing...' : 'Continue with Google'}
-          </button>
 
           <AnimatePresence>
             {error && (
               <motion.div 
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="mt-6 p-3 rounded-xl bg-red-500/10 border border-red-500/20 flex gap-3"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="mt-10 p-5 rounded-2xl bg-red-500/10 border border-red-500/20 flex gap-4"
               >
-                <AlertCircle className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
-                <div className="text-[11px] text-red-200 leading-relaxed">
-                  {error.includes('redirect_uri') 
-                    ? "Auth Error: Redirect URI Mismatch. Check your Google Console." 
-                    : error}
+                <AlertCircle className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
+                <div className="text-[11px] text-red-100/70 leading-relaxed font-mono">
+                  <span className="text-red-500 font-bold uppercase block mb-1">SYNC ERROR:</span>
+                  {error}
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
 
-          <div className="mt-10 flex flex-col items-center gap-3">
-            <p className="text-[10px] text-muted-foreground/60 text-center uppercase tracking-widest leading-loose">
-              Security Protocol 0.82-B ACTIVE<br/>
-              No plaintext passwords stored.
-            </p>
-            <div className="flex gap-4">
-              <Github className="h-3 w-3 text-muted-foreground hover:text-white cursor-pointer transition-colors" />
-              <ShieldCheck className="h-3 w-3 text-muted-foreground hover:text-white cursor-pointer transition-colors" />
+          <footer className="mt-12 pt-8 border-t border-white/5 w-full">
+            <div className="flex justify-between items-center opacity-30 text-[9px] font-mono uppercase tracking-widest">
+              <span>Secure Link v2.0</span>
+              <div className="flex gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                <div className="w-1.5 h-1.5 rounded-full bg-cyan-500" />
+              </div>
             </div>
-          </div>
+          </footer>
         </div>
       </motion.div>
     </div>

@@ -6,68 +6,68 @@
 
 @layer base {
   :root {
-    --background: 0 0% 0%;
-    --foreground: 210 40% 98%;
-    --card: 0 0% 4%;
-    --card-foreground: 210 40% 98%;
-    --popover: 0 0% 4%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 263 70% 50%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 0 0% 8%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 0 0% 8%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 263 70% 50%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 0 0% 12%;
-    --input: 0 0% 12%;
-    --ring: 263 70% 50%;
+    --background: 240 10% 2%;
+    --foreground: 0 0% 100%;
+    --card: 240 10% 4%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 263 90% 64%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 10% 6%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 10% 7%;
+    --muted-foreground: 240 5% 70%;
+    --accent: 185 90% 50%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 10% 12%;
+    --input: 240 10% 12%;
+    --ring: 263 90% 64%;
     --radius: 1rem;
-    --sidebar-background: 0 0% 2%;
-    --sidebar-foreground: 215 20% 75%;
-    --sidebar-border: 0 0% 12%;
-    --glow-primary: 263 70% 60%;
-    --glow-cyan: 185 80% 60%;
-    --glow-pink: 330 80% 65%;
-    --surface-glass: 220 30% 96% / 0.05;
-    --surface-glass-hover: 220 30% 96% / 0.09;
-    --border-glass: 220 30% 96% / 0.1;
-    --border-glass-glow: 263 70% 50% / 0.4;
+    --sidebar-background: 240 10% 2%;
+    --sidebar-foreground: 240 5% 85%;
+    --sidebar-border: 240 10% 10%;
+    --glow-primary: 263 90% 64%;
+    --glow-cyan: 185 90% 50%;
+    --glow-pink: 330 90% 65%;
+    --surface-glass: 240 10% 8% / 0.4;
+    --surface-glass-hover: 240 10% 12% / 0.6;
+    --border-glass: 240 10% 20% / 0.3;
+    --border-glass-glow: 263 90% 64% / 0.5;
   }
 
   .light {
-    --background: 0 0% 98%;
-    --foreground: 222 47% 11%;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 0 0% 0%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 0 0% 0%;
     --primary: 263 70% 50%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 222 47% 11%;
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%;
+    --secondary: 0 0% 95%;
+    --secondary-foreground: 0 0% 0%;
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 20%;
     --accent: 263 70% 50%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
+    --border: 0 0% 85%;
+    --input: 0 0% 85%;
     --ring: 263 70% 50%;
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 220 9% 46%;
-    --sidebar-border: 220 13% 91%;
+    --sidebar-foreground: 0 0% 0%;
+    --sidebar-border: 0 0% 90%;
     --glow-primary: 263 70% 50%;
-    --glow-cyan: 185 80% 40%;
-    --glow-pink: 330 80% 50%;
-    --surface-glass: 220 30% 20% / 0.04;
-    --surface-glass-hover: 220 30% 20% / 0.08;
-    --border-glass: 220 30% 20% / 0.1;
-    --border-glass-glow: 263 70% 50% / 0.2;
+    --glow-cyan: 185 80% 35%;
+    --glow-pink: 330 80% 45%;
+    --surface-glass: 0 0% 100% / 0.8;
+    --surface-glass-hover: 0 0% 100% / 1;
+    --border-glass: 0 0% 0% / 0.15;
+    --border-glass-glow: 263 70% 50% / 0.3;
   }
 
   * {
@@ -227,4 +227,22 @@
     -webkit-text-fill-color: transparent;
     font-weight: 800;
   }
+
+  /* Synapse Grid Heatmap Styles — NeuroFlow High Fidelity */
+  .contrib-cell {
+    border-radius: 2px;
+    border: 1px solid rgba(255,255,255,0.08);
+    transition: all 0.2s ease;
+  }
+  .contrib-0 { background: rgba(255, 255, 255, 0.03); }
+  .contrib-1 { background: #4c1d95; box-shadow: 0 0 8px rgba(139, 92, 246, 0.4); }
+  .contrib-2 { background: #8b5cf6; box-shadow: 0 0 12px rgba(139, 92, 246, 0.6); }
+  .contrib-3 { background: #a78bfa; box-shadow: 0 0 15px rgba(139, 92, 246, 0.8); }
+  .contrib-4 { background: #ffffff; box-shadow: 0 0 20px rgba(255, 255, 255, 0.9); }
+
+  .light .contrib-0 { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1); }
+  .light .contrib-1 { background: #ede9fe; }
+  .light .contrib-2 { background: #ddd6fe; }
+  .light .contrib-3 { background: #c4b5fd; }
+  .light .contrib-4 { background: #8b5cf6; }
 }

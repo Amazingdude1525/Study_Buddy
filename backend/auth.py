@@ -1,6 +1,6 @@
 import os
 import httpx
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from typing import Optional
 from jose import JWTError, jwt
 from fastapi import Depends, HTTPException, status
@@ -80,15 +80,21 @@ async def exchange_google_code(code: str, redirect_uri: str) -> Optional[dict]:
 
 
 def get_or_create_user(session: Session, google_info: dict) -> User:
-    """Get existing user or create new one from Google profile."""
-    google_sub = str(google_info.get("sub", google_info.get("id", "")))
-    user = session.exec(select(User).where(User.google_sub == google_sub)).first()
+    sub = google_info.get("sub")
+    email = google_info.get("email")
+    name = google_info.get("name", "User")
+    picture = google_info.get("picture")
+
+    user = session.exec(select(User).where(User.google_sub == sub)).first()
     if not user:
         user = User(
-            google_sub=google_sub,
-            email=google_info.get("email", ""),
-            name=google_info.get("name", "Student"),
-            picture=google_info.get("picture", ""),
+            google_sub=sub,
+            email=email,
+            name=name,
+            picture=picture,
+            xp=0,
+            level=1,
+            streak=0
         )
         session.add(user)
         session.commit()

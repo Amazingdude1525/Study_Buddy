@@ -67,7 +67,7 @@ function AppRoutes() {
 }
 
 const App = () => (
-  <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || ""}>
+  <GoogleOAuthProvider clientId="313350298549-e51tt0cqiq2j8rnld5frgi7naemlqqct.apps.googleusercontent.com">
     <AuthProvider>
       <ThemeProvider>
         <BrowserRouter>

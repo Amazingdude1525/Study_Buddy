@@ -39,8 +39,12 @@ export default function GoalsPage() {
   };
 
   const updateProgress = async (goal: Goal, progress: number) => {
-    await updateGoal(goal.id, { progress, is_done: progress === 100 }).catch(() => {});
-    setGoals(gs => gs.map(g => g.id === goal.id ? { ...g, progress, is_done: progress === 100 } : g));
+    const isDoneNow = progress === 100;
+    await updateGoal(goal.id, { progress, is_done: isDoneNow }).catch(() => {});
+    if (isDoneNow && !goal.is_done) {
+      window.dispatchEvent(new Event('refreshStats'));
+    }
+    setGoals(gs => gs.map(g => g.id === goal.id ? { ...g, progress, is_done: isDoneNow } : g));
   };
 
   const remove = async (id: number) => {

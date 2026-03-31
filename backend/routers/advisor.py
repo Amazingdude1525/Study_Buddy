@@ -83,24 +83,32 @@ async def _stream_gemini(prompt: str, context: str):
 
     try:
         import google.generativeai as genai
+        print(f"DEBUG: Initializing Gemini for prompt: {prompt[:50]}...")
         genai.configure(api_key=GEMINI_API_KEY)
         model = genai.GenerativeModel("gemini-1.5-flash")
 
         system_prompt = (
-            "You are Vityarthi AI, a friendly and motivating study assistant. "
-            "You help students study smarter, stay motivated, and reach their goals. "
-            "Be concise, warm, and actionable. Use markdown formatting. "
-            f"Context about this student: {context}"
+            "You are NeuroFlow AI, a high-precision study architect. "
+            "Optimize for neuro-plasticity and time-efficiency. "
+            f"\nCONTEXT: {context}"
         )
-        full_prompt = f"{system_prompt}\n\nStudent: {prompt}\nVityarthi AI:"
+        full_prompt = f"{system_prompt}\n\nStudent: {prompt}"
 
         response = model.generate_content(full_prompt, stream=True)
+        has_yielded = False
         for chunk in response:
             if chunk.text:
                 yield f"data: {json.dumps({'text': chunk.text})}\n\n"
+                has_yielded = True
+        
+        if not has_yielded:
+            yield f"data: {json.dumps({'text': 'Neural Link Stable. How can I assist you today?'})}\n\n"
+            
         yield "data: [DONE]\n\n"
     except Exception as e:
-        yield f"data: {json.dumps({'text': f'AI is unavailable: {str(e)}'})}\n\n"
+        print(f"❌ GEMINI ERROR: {str(e)}")
+        fallback = "Neural Link unstable, but I'm still here. Pro tip: Try a 5-min 'Micro-Focus' block to get started! 🚀"
+        yield f"data: {json.dumps({'text': fallback})}\n\n"
         yield "data: [DONE]\n\n"
 
 

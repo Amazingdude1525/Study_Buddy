@@ -1,88 +1,55 @@
-# AI Vityarthi: Deployment & Admin Guide
+# NeuroFlow: Production Full-Stack Guide 🚀🏔️
 
-## 🚀 Live Production Links
-- **Frontend (Vercel)**: [https://study-buddy-vityarthi.vercel.app](https://study-buddy-vityarthi.vercel.app)
-- **Codebase (GitHub)**: [https://github.com/Amazingdude1525/Study_Buddy](https://github.com/Amazingdude1525/Study_Buddy)
+This guide covers the deployment and management of the NeuroFlow ecosystem using a high-fidelity **FastAPI + PostgreSQL + React** stack.
 
----
-
-This guide provides the necessary steps to manage the study environment and the backend kernel.
-
-### 1. Prerequisites
-Ensure the following are installed on the host machine:
-- **Node.js 18+** (for the Vite frontend)
-- **Python 3.10+** (for the FastAPI backend)
-- **GCC / G++ Compiler** (Required for the C/C++ Code Terminal)
-
-### 2. Physical Setup
-1. **Backend**:
-   ```bash
-   cd backend
-   pip install -r requirements.txt
-   python -m uvicorn main:app --host 0.0.0.0 --port 8000
-   ```
-2. **Frontend**:
-   ```bash
-   npm install
-   npm run build
-   # For local preview:
-   npm run dev
-   ```
-
-### 3. Environment Variables
-Ensure the `.env` files contain your specific API keys:
-- `VITE_GOOGLE_CLIENT_ID`: Your Google OAuth 2.0 Client ID.
-- `DATABASE_URL`: Location for your SQLite/Postgres DB.
+## 🐘 Data & Database Management (Neon)
+Since we have migrated to **Neon PostgreSQL**, your data is now persistent and globally accessible.
+1. **Accessing the Data**: 
+   - Log in to your [Neon Console](https://console.neon.tech).
+   - Select your **NeuroFlow** project.
+   - Click **Tables** or **SQL Editor** in the left sidebar to see all user study data, streaks, and focus logs live.
+2. **Environment Key**: Your `DATABASE_URL` in `.env` is the "Neural Link." Never share this publicly.
 
 ---
 
-## 🌐 Running on Other Systems
+## 🌐 Production Deployment Flow (The CI/CD Master Plan)
 
-### 1. Same Network (LAN) Access
-To allow your friends or other devices on your Wi-Fi to access the site:
-1. **Backend**: Start with `--host 0.0.0.0`:
-   ```bash
-   uvicorn main:app --host 0.0.0.0 --port 8000
-   ```
-2. **Frontend**: Start with `--host`:
-   ```bash
-   npm run dev -- --host
-   ```
-3. **Access**: Others can use your computer's IP address (e.g., `http://192.168.1.10:5173`).
+To make your project live for the world, follow this **3-step workflow**:
 
-### 2. Internet Access (The "Easy" Way)
-Use a tunnel like **Ngrok** to get a public URL for free:
-1. Install Ngrok.
-2. Run `ngrok http 5173` for the frontend.
-3. Run `ngrok http 8000` for the backend.
-*Note: You will need to update the `API_BASE` in `src/services/api.ts` to match the backend's Ngrok URL.*
+### 1. Synchronize to GitHub (Mandatory)
+Both Vercel and Railway deploy directly from your GitHub repository.
+```bash
+git add .
+git commit -m "feat: upgrade to NeuroFlow 2.0 Full-Stack"
+git push origin main
+```
 
-### 3. Professional Deployment (Full Production)
-- **Frontend**: Deploy the `dist` folder to **Vercel** or **Netlify**.
-- **Backend (Recommended)**: Deploy your code to **[Railway.app](https://railway.app)**. 
-  - Just click "New" -> "GitHub Repo" -> select `Study_Buddy`.
-  - It will automatically detect the `backend/Procfile` and start the server!
-- **Alternatively**: Use Render or a VPS.
+### 2. Frontend Deployment (Vercel)
+- **Repo**: [https://study-buddy-vityarthi.vercel.app](https://study-buddy-vityarthi.vercel.app)
+- Vercel will automatically detect your push and rebuild the site.
+- **IMPORTANT**: Go to Vercel -> Project Settings -> Environment Variables and add:
+  - `VITE_API_BASE`: (Your backend URL from Railway/Ngrok)
+
+### 3. Backend Deployment (Railway.app — Recommended)
+1. Go to [Railway.app](https://railway.app) and create a "New Project" from your GitHub repo.
+2. **Variables**: In the Railway dashboard, add these keys from your `.env`:
+   - `DATABASE_URL`: (Your Neon connection string)
+   - `GEMINI_API_KEY`: (Your Google AI key)
+   - `JWT_SECRET`: (Your security key)
+3. **Detection**: Railway will see the `backend/Procfile` and start the NeuroFlow kernel automatically.
 
 ---
 
-## 🛡️ Admin Panel & Controls
-
-The Admin Panel is a restricted zone for monitoring user activity, location data, and system logs.
-
-### 1. Accessing the Panel
-- **URL**: Navigate directly to `http://localhost:5173/admin`.
-- **Authentication**: You must be logged in with an account that has `is_admin=true` in the database.
-
-### 2. Key Features
-- **User Monitoring**: View a list of all registered scholars and their study streaks.
-- **Location Logs**: Access IP-based location data captured during login/focus sessions.
-- **Webcam Snapshots**: If configured, view the periodic sentiment analysis snapshots used to verify focus.
-- **System Logs**: Live feed of the "Kernel" activity (code compilation attempts and AI advisor calls).
+## 🛡️ Admin & Security Infrastructure
+The Admin Dashboard (`/admin`) is your central command center.
+- **Grant Admin**: Run `python make_admin.py` in the backend folder to upgrade your account.
+- **Live Monitoring**: View IP-based location logs and webcam sentiment snapshots directly from the panel.
 
 ---
 
-## 🎨 Social Customization (Creator Tab)
-To update your photo in the **Creator** (`/about`) page:
-1. Save your headshot as `developer.jpg` in the `public/` directory.
-2. Your LinkedIn and GitHub links are already hardcoded to your provided profiles.
+## 🎨 Creator Customization
+To personalize the **Creator** tab:
+1. Replace `public/developer.jpg` with your own photo.
+2. The UI will automatically pull your profile data from the `is_admin` user account in the database.
+
+**Full-Stack Status: Operational 🧠✨**
