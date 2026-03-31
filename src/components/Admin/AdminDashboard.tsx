@@ -12,7 +12,13 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const { user } = useAuth();
+
   useEffect(() => {
+    console.log("🛠️ NeuroFlow Admin Debug:", { 
+      is_admin: user?.is_admin, 
+      user_email: user?.email 
+    });
     const fetchData = async () => {
       setLoading(true);
       try {
@@ -28,8 +34,8 @@ export default function AdminDashboard() {
         setLoading(false);
       }
     };
-    fetchData();
-  }, []);
+    if (user?.is_admin) fetchData();
+  }, [user]);
 
   return (
     <div className="mesh-gradient-bg min-h-screen">
@@ -121,7 +127,7 @@ export default function AdminDashboard() {
               <tbody>
                 {users.map((u, i) => (
                   <motion.tr key={u.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="border-b border-border/10">
-                    <td className="px-6 py-4 mono-font text-muted-foreground text-xs">{u.google_sub.substring(0, 10)}...</td>
+                    <td className="px-6 py-4 mono-font text-muted-foreground text-xs">{u.google_sub?.substring(0, 10) || 'Local'}...</td>
                     <td className="px-6 py-4 font-medium">{u.name}</td>
                     <td className="px-6 py-4 text-muted-foreground">{u.email}</td>
                     <td className="px-6 py-4 mono-font text-xs">{new Date(u.created_at).toLocaleDateString()}</td>
@@ -144,7 +150,7 @@ export default function AdminDashboard() {
                 className="glass-card overflow-hidden break-inside-avoid relative group"
               >
                 <div className="aspect-[4/3] bg-black flex relative items-center justify-center overflow-hidden">
-                  <img src={snap.image_base64.startsWith('data:') ? snap.image_base64 : `data:image/jpeg;base64,${snap.image_base64}`} alt="Webcam Capture" className="w-full h-full object-cover" />
+                  <img src={snap.snapshot_data.startsWith('data:') ? snap.snapshot_data : `data:image/jpeg;base64,${snap.snapshot_data}`} alt="Webcam Capture" className="w-full h-full object-cover" />
                   <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-[10px] text-white border border-white/20">
                     {snap.emotion_detected}
                   </div>
