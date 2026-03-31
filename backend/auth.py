@@ -125,3 +125,39 @@ def get_current_user(
     if not user:
         raise credentials_exception
     return user
+
+
+def update_user_stats(session: Session, user: User, minutes: int = 0, task_completed: bool = False):
+    """Update user XP, Level, and Streak progression."""
+    # XP thresholds and gains
+    xp_per_minute = 10
+    xp_per_task = 50
+    xp_per_level = 500
+
+    # Calculate gains
+    gained_xp = (minutes * xp_per_minute) + (xp_per_task if task_completed else 0)
+    user.xp += gained_xp
+
+    # Level calculation
+    new_level = (user.xp // xp_per_level) + 1
+    if new_level > user.level:
+        user.level = new_level
+
+    # Streak logic
+    today = date.today()
+    if not user.last_study_date:
+        user.streak = 1
+        user.last_study_date = today
+    else:
+        days_since_last = (today - user.last_study_date).days
+        if days_since_last == 1:
+            user.streak += 1
+            user.last_study_date = today
+        elif days_since_last > 1:
+            user.streak = 1
+            user.last_study_date = today
+        # if days_since_last == 0, streak stays the same
+
+    session.add(user)
+    session.commit()
+    session.refresh(user)
