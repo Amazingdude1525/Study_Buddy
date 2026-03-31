@@ -99,6 +99,7 @@ async def analyze_sentiment(
                 is_matched = False
 
         # [NEW] Save snapshot for admin review
+        confidence = round(scores.get(dominant, 0), 1)
         snapshot = WebcamSnapshot(
             user_id=user.id,
             snapshot_data=payload.image_base64,

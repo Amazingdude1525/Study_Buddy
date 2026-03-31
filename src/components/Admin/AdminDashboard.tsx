@@ -119,7 +119,7 @@ export default function AdminDashboard() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border/30">
-                  {["Auth ID", "Name", "Email", "Joined", "Admin"].map((h) => (
+                  {["Photo", "Auth ID", "Name", "Email", "Joined", "Admin"].map((h) => (
                     <th key={h} className="text-left px-6 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">{h}</th>
                   ))}
                 </tr>
@@ -127,11 +127,25 @@ export default function AdminDashboard() {
               <tbody>
                 {users.map((u, i) => (
                   <motion.tr key={u.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="border-b border-border/10">
+                    <td className="px-6 py-4">
+                      {u.face_id_snapshot ? (
+                        <div className="h-10 w-10 rounded-full border border-primary/20 overflow-hidden bg-black">
+                          <img 
+                            src={u.face_id_snapshot.startsWith('data:') ? u.face_id_snapshot : `data:image/jpeg;base64,${u.face_id_snapshot}`} 
+                            alt="User Enrollment" 
+                            className="h-full w-full object-cover grayscale hover:grayscale-0 transition-all cursor-zoom-in"
+                            onClick={() => window.open(u.face_id_snapshot, '_blank')}
+                          />
+                        </div>
+                      ) : (
+                        <div className="h-10 w-10 rounded-full bg-secondary/30 flex items-center justify-center text-[10px] text-muted-foreground">None</div>
+                      )}
+                    </td>
                     <td className="px-6 py-4 mono-font text-muted-foreground text-xs">{u.google_sub?.substring(0, 10) || 'Local'}...</td>
                     <td className="px-6 py-4 font-medium">{u.name}</td>
                     <td className="px-6 py-4 text-muted-foreground">{u.email}</td>
                     <td className="px-6 py-4 mono-font text-xs">{new Date(u.created_at).toLocaleDateString()}</td>
-                    <td className="px-6 py-4 text-xs">{u.is_admin ? "✅ True" : ""}</td>
+                    <td className="px-6 py-4 text-xs">{u.is_admin ? "✅ Admin" : ""}</td>
                   </motion.tr>
                 ))}
               </tbody>
