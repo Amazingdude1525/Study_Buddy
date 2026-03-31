@@ -92,9 +92,9 @@ export default function LoginPage() {
         >
           <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
           
-          {/* Logo Area */}
-          <div className="flex flex-col items-center mb-8">
-            <motion.div 
+            <div className="flex flex-col items-center mb-8">
+              <div className="absolute top-4 right-4 text-[10px] font-bold text-muted-foreground/30 uppercase tracking-[0.2em]">V2.0 Premium</div>
+              <motion.div 
               whileHover={{ rotate: 360 }}
               transition={{ duration: 1 }}
               className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center mb-4 border border-primary/30"
