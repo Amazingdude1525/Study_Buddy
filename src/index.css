@@ -96,6 +96,12 @@
     background: linear-gradient(135deg, hsl(0 0% 98%) 0%, hsl(263 30% 96%) 40%, hsl(0 0% 98%) 70%, hsl(185 20% 96%) 100%);
   }
 
+  @keyframes pulseRing {
+    0% { transform: scale(0.95); opacity: 0.5; }
+    50% { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(0.95); opacity: 0.5; }
+  }
+
   /* Highly Blurred Glass Cards */
   .glass-card {
     background: hsl(var(--surface-glass));

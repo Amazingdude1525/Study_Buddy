@@ -69,14 +69,11 @@ async def exchange_google_code(code: str, redirect_uri: str) -> Optional[dict]:
                 return None
             
             user_info = user_resp.json()
+            # Ensure sub/id is normalized
+            if "sub" not in user_info and "id" in user_info:
+                user_info["sub"] = user_info["id"]
             print(f"DEBUG: Successfully fetched user info for email: {user_info.get('email')}")
             return user_info
-            if user_resp.status_code != 200:
-                print("Profile fetch failed:", user_resp.text)
-                return None
-            profile = user_resp.json()
-            profile["sub"] = profile.get("id", profile.get("sub", ""))
-            return profile
     except Exception as e:
         print("Exception in Google exchange:", e)
         return None
