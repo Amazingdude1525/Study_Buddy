@@ -33,8 +33,10 @@ async def exchange_google_code(code: str, redirect_uri: str) -> Optional[dict]:
         return None
 
     try:
+        print(f"DEBUG: Beginning Google code exchange for code: {code[:10]}...")
         # Step 1: Exchange code for tokens
-        with httpx.Client(timeout=10.0) as client:
+        with httpx.Client(timeout=15.0) as client:
+            print(f"DEBUG: Sending POST to Google token endpoint with redirect_uri: {redirect_uri}")
             token_resp = client.post(
                 "https://oauth2.googleapis.com/token",
                 data={
@@ -45,19 +47,30 @@ async def exchange_google_code(code: str, redirect_uri: str) -> Optional[dict]:
                     "grant_type": "authorization_code",
                 },
             )
+            print(f"DEBUG: Token response status: {token_resp.status_code}")
             if token_resp.status_code != 200:
-                print("Token exchange failed:", token_resp.text)
+                print(f"DEBUG: Token exchange failed. Error: {token_resp.text}")
                 return None
             tokens = token_resp.json()
             access_token = tokens.get("access_token")
             if not access_token:
+                print("DEBUG: No access_token found in response.")
                 return None
 
+            print("DEBUG: Fetching user profile from Google...")
             # Step 2: Fetch user profile
             user_resp = client.get(
                 "https://www.googleapis.com/oauth2/v2/userinfo",
                 headers={"Authorization": f"Bearer {access_token}"},
             )
+            print(f"DEBUG: User profile status: {user_resp.status_code}")
+            if user_resp.status_code != 200:
+                print(f"DEBUG: Failed to fetch user info. Error: {user_resp.text}")
+                return None
+            
+            user_info = user_resp.json()
+            print(f"DEBUG: Successfully fetched user info for email: {user_info.get('email')}")
+            return user_info
             if user_resp.status_code != 200:
                 print("Profile fetch failed:", user_resp.text)
                 return None

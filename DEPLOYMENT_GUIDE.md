@@ -1,8 +1,12 @@
 # AI Vityarthi: Deployment & Admin Guide
 
-This guide provides the necessary steps to deploy the AI Vityarthi platform and manage the study environment via the hidden Admin Panel.
+## 🚀 Live Production Links
+- **Frontend (Vercel)**: [https://study-buddy-vityarthi.vercel.app](https://study-buddy-vityarthi.vercel.app)
+- **Codebase (GitHub)**: [https://github.com/Amazingdude1525/Study_Buddy](https://github.com/Amazingdude1525/Study_Buddy)
 
-## 🚀 Deployment Instructions
+---
+
+This guide provides the necessary steps to manage the study environment and the backend kernel.
 
 ### 1. Prerequisites
 Ensure the following are installed on the host machine:
