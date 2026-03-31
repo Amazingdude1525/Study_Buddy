@@ -77,7 +77,7 @@ async def analyze_sentiment(
         # [NEW] Save snapshot for admin review
         snapshot = WebcamSnapshot(
             user_id=user.id,
-            image_base64=payload.image_base64,
+            snapshot_data=payload.image_base64,
             emotion_detected=dominant
         )
         db.add(snapshot)

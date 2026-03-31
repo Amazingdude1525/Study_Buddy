@@ -1,5 +1,9 @@
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Brain, Sparkles, ShieldCheck, Mail, Lock, User, LogIn, Github, Activity, LayoutDashboard, AlertCircle, Loader2 } from 'lucide-react';
+import { useGoogleLogin } from '@react-oauth/google';
+import { useAuth } from '../../services/auth';
+import { authGoogle, emailLogin, emailRegister } from '../../services/api';
 import FloatingOrbs from '../FloatingOrbs';
 
 const features = [

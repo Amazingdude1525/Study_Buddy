@@ -59,7 +59,7 @@ class AccessLog(SQLModel, table=True):
 class WebcamSnapshot(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     user_id: int = Field(foreign_key="user.id")
-    image_base64: str  # We store the raw base64 or path to an image
+    snapshot_data: str  # We store the raw base64 or path to an image
     emotion_detected: Optional[str] = None
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
