@@ -106,7 +106,7 @@ export default function LoginPage() {
               <Brain className="h-8 w-8 text-primary" style={{ filter: 'drop-shadow(0 0 8px rgba(139, 92, 246, 0.6))' }} />
             </motion.div>
             <h1 className="text-4xl font-bold tracking-tighter mb-2">
-              <span className="gradient-text" style={{ background: 'linear-gradient(135deg, #8b5cf6, #06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>AI Vityarthi</span>
+              <span className="gradient-text" style={{ background: 'linear-gradient(135deg, #8b5cf6, #06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>!!! PREMIUM AI VITYARTHI !!!</span>
             </h1>
             <p className="text-muted-foreground text-sm text-center">
               Elevate your focus with neural study patterns.
@@ -171,7 +171,7 @@ export default function LoginPage() {
               className="w-full bg-primary hover:opacity-90 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-[0_10px_20px_-10px_rgba(99,102,241,0.5)] glow-btn"
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogIn className="h-4 w-4" />}
-              {loading ? 'Processing...' : (isRegister ? 'Create Scholar Account' : 'Authenticate')}
+              {loading ? 'Processing...' : (isRegister ? 'Create Scholar Account' : '!!! AUTHENTICATE NOW !!!')}
             </button>
           </form>
 

@@ -8,6 +8,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from database import create_db_and_tables, get_session
+# Ensure tables are updated/created
+try:
+    create_db_and_tables()
+except Exception as e:
+    print(f"⚠️ DATABASE WARNING: {e}")
 import httpx
 from auth import exchange_google_code, get_or_create_user, create_access_token
 from routers import users, sentiment, music, pomodoro, goals, contributions, advisor, resources, sandbox, admin
