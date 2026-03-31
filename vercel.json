@@ -2,6 +2,11 @@
   "framework": "vite",
   "buildCommand": "npm run build",
   "installCommand": "npm install",
+  "build": {
+    "env": {
+      "VITE_API_URL": "https://ample-beauty-production.up.railway.app"
+    }
+  },
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
