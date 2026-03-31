@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🧠 NeuroFlow
+# 🧠 Neuro Flow
 ### *Next-Gen Neural Learning Environment*
 
 *A premium, high-performance study companion engineered to hack your productivity.*
@@ -18,7 +18,7 @@
 
 ## 🌌 The Vision
 
-AI Vityarthi is not just another static task manager. It is a living, adaptive study ecosystem built with a cutting-edge glassmorphic UI. By fusing emotional intelligence algorithms with hardcore productivity tools, this environment reacts to your state of mind to keep you in the flow state. 
+Neuro Flow is not just another static task manager. It is a living, adaptive study ecosystem built with a cutting-edge glassmorphic UI. By fusing emotional intelligence algorithms with hardcore productivity tools, this environment reacts to your state of mind to keep you in the flow state. 
 
 *Note: This platform is a continuous work in progress. It will be actively updated with new features, optimizations, and AI models over time.*
 
