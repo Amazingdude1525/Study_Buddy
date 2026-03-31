@@ -9,6 +9,10 @@ export interface VUser {
   onboarded: boolean;
   is_admin?: boolean;
   subjects?: string[];
+  xp?: number;
+  level?: number;
+  streak?: number;
+  face_id_snapshot?: string;
 }
 
 interface AuthCtx {
