@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🧠 AI Vityarthi
+# 🧠 NeuroFlow
 ### *Next-Gen Neural Learning Environment*
 
 *A premium, high-performance study companion engineered to hack your productivity.*
