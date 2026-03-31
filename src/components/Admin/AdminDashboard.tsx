@@ -85,7 +85,7 @@ export default function AdminDashboard() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border/30">
-                  {["User Email", "IP Address", "Location", "Timestamp"].map((h) => (
+                  {["User Email", "IP Address", "Device", "Network", "Coords", "Timestamp"].map((h) => (
                     <th key={h} className="text-left px-6 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       {h}
                     </th>
@@ -99,11 +99,17 @@ export default function AdminDashboard() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.05 }}
-                    className="border-b border-border/10 hover:bg-secondary/20 transition-colors"
+                    className="border-b border-border/10 hover:bg-secondary/20 transition-colors text-[11px]"
                   >
                     <td className="px-6 py-4 font-medium">{users.find(u => u.id === log.user_id)?.email || log.user_id}</td>
-                    <td className="px-6 py-4 mono-font text-muted-foreground">{log.ip_address || '127.0.0.1'}</td>
-                    <td className="px-6 py-4 text-muted-foreground">{log.location_city ? `${log.location_city}, ${log.location_country}` : 'Local'}</td>
+                    <td className="px-6 py-4 mono-font text-muted-foreground">{log.ip_address || '127.0.0.1'} / {log.location_city || 'Local'}</td>
+                    <td className="px-6 py-4 text-muted-foreground max-w-[150px] truncate" title={log.user_agent}>
+                      {log.user_agent ? (log.user_agent.includes("Windows") ? "💻 Windows" : log.user_agent.includes("Android") ? "📱 Android" : log.user_agent.includes("iPhone") ? "📱 iPhone" : "🌐 Other") : "Local"}
+                    </td>
+                    <td className="px-6 py-4 text-muted-foreground italic">{log.isp || "Private Network"}</td>
+                    <td className="px-6 py-4 text-muted-foreground mono-font">
+                      {log.latitude ? `${log.latitude.toFixed(2)}, ${log.longitude.toFixed(2)}` : "-"}
+                    </td>
                     <td className="px-6 py-4 mono-font text-xs text-muted-foreground">{new Date(log.timestamp).toLocaleString()}</td>
                   </motion.tr>
                 ))}

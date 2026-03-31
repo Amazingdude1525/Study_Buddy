@@ -94,12 +94,13 @@ async def google_login(
     
     # [NEW] Log IP and Geographical Location (Hardened for Proxy/Railway)
     forwarded = request.headers.get("X-Forwarded-For")
+    user_agent = request.headers.get("User-Agent")
     if forwarded:
         client_ip = forwarded.split(",")[0].strip()
     else:
         client_ip = request.client.host if request.client else None
         
-    city, country = None, None
+    city, country, lat, lon, isp = None, None, None, None, None
     if client_ip and client_ip not in ["127.0.0.1", "::1", "localhost", "0.0.0.0"]:
         try:
             with httpx.Client(timeout=5.0) as client:
@@ -109,15 +110,21 @@ async def google_login(
                     if ip_data.get("status") == "success":
                         city = ip_data.get("city")
                         country = ip_data.get("country")
+                        lat = ip_data.get("lat")
+                        lon = ip_data.get("lon")
+                        isp = ip_data.get("isp")
         except Exception as e:
             print(f"⚠️ IP API ERROR for {client_ip}: {e}")
 
-    from models import AccessLog
     log_entry = AccessLog(
         user_id=user.id,
         ip_address=client_ip,
         location_city=city,
-        location_country=country
+        location_country=country,
+        latitude=lat,
+        longitude=lon,
+        user_agent=user_agent,
+        isp=isp
     )
     db.add(log_entry)
     db.commit()

@@ -58,6 +58,10 @@ class AccessLog(SQLModel, table=True):
     ip_address: Optional[str] = None
     location_city: Optional[str] = None
     location_country: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    user_agent: Optional[str] = None
+    isp: Optional[str] = None
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
 
