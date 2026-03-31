@@ -31,12 +31,12 @@ app = FastAPI(
     version="1.0.0",
 )
 
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "*")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
+    allow_origins=[FRONTEND_URL, "https://study-buddy-vityarthi.vercel.app"] if FRONTEND_URL != "*" else ["*"],
+    allow_credentials=True if FRONTEND_URL != "*" else False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
