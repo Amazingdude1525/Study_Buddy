@@ -59,7 +59,10 @@ Use a tunnel like **Ngrok** to get a public URL for free:
 
 ### 3. Professional Deployment (Full Production)
 - **Frontend**: Deploy the `dist` folder to **Vercel** or **Netlify**.
-- **Backend**: Deploy your code to **Railway.app**, **Render**, or a VPS.
+- **Backend (Recommended)**: Deploy your code to **[Railway.app](https://railway.app)**. 
+  - Just click "New" -> "GitHub Repo" -> select `Study_Buddy`.
+  - It will automatically detect the `backend/Procfile` and start the server!
+- **Alternatively**: Use Render or a VPS.
 
 ---
 
