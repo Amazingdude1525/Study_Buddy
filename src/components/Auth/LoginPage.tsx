@@ -63,7 +63,16 @@ export default function LoginPage() {
   });
 
   return (
-    <div className="mesh-gradient-bg flex items-center justify-center p-4">
+    <div 
+      className="mesh-gradient-bg flex items-center justify-center p-4 min-h-screen"
+      style={{ 
+        background: 'linear-gradient(135deg, #000 0%, #1a0b2e 40%, #050505 70%, #0a1a1a 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh'
+      }}
+    >
       <FloatingOrbs />
       
       <motion.div 
@@ -71,7 +80,16 @@ export default function LoginPage() {
         animate={{ opacity: 1, scale: 1 }}
         className="w-full max-w-[420px] relative z-20"
       >
-        <div className="glass-card p-10 relative overflow-hidden group">
+        <div 
+          className="glass-card p-10 relative overflow-hidden group"
+          style={{
+            background: 'rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(20px)',
+            borderRadius: '1.5rem',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            padding: '2.5rem'
+          }}
+        >
           <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
           
           {/* Logo Area */}
@@ -81,10 +99,10 @@ export default function LoginPage() {
               transition={{ duration: 1 }}
               className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center mb-4 border border-primary/30"
             >
-              <Brain className="h-8 w-8 glow-text" />
+              <Brain className="h-8 w-8 text-primary" style={{ filter: 'drop-shadow(0 0 8px rgba(139, 92, 246, 0.6))' }} />
             </motion.div>
             <h1 className="text-4xl font-bold tracking-tighter mb-2">
-              <span className="gradient-text">AI Vityarthi</span>
+              <span className="gradient-text" style={{ background: 'linear-gradient(135deg, #8b5cf6, #06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>AI Vityarthi</span>
             </h1>
             <p className="text-muted-foreground text-sm text-center">
               Elevate your focus with neural study patterns.
@@ -99,6 +117,7 @@ export default function LoginPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 + 0.3 }}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary/50 border border-border/30 text-[10px] uppercase tracking-widest font-bold text-muted-foreground"
+                style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)' }}
               >
                 {f.icon} {f.label}
               </motion.span>
