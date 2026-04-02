@@ -7,7 +7,7 @@
 
 > *"AI will not replace learners; learners who use AI will replace those who don't. The ultimate competitive advantage in the modern era is the speed and efficiency at which you acquire new skills."*
 
-**Crafted with precision by Prateek Das** | **Registration ID:** `25bce10599`
+**Crafted with precision by Prateek Das**
 
 [![Live Deployment](https://img.shields.io/badge/Live-View_Platform-success?style=for-the-badge&logo=vercel)](https://study-buddy-vityarthi.vercel.app)
 [![GitHub Repository](https://img.shields.io/badge/GitHub-View_Source-black?style=for-the-badge&logo=github)](https://github.com/Amazingdude1525/Study_Buddy)
